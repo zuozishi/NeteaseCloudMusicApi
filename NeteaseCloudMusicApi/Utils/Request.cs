@@ -5,10 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace NeteaseCloudMusicApi.Utils {
 	internal static class Request {
@@ -47,7 +47,7 @@ namespace NeteaseCloudMusicApi.Utils {
 			}
 		}
 
-		public static async Task<JObject> CreateRequest(string method, string url, Dictionary<string, object> data, Options options, CookieCollection setCookie) {
+		public static async Task<JsonNode> CreateRequest(string method, string url, Dictionary<string, object> data, Options options, CookieCollection setCookie) {
 			if (method is null)
 				throw new ArgumentNullException(nameof(method));
 			if (url is null)
@@ -106,7 +106,7 @@ namespace NeteaseCloudMusicApi.Utils {
 				if (!(cookie["MUSIC_A"] is null))
 					header["MUSIC_A"] = cookie["MUSIC_A"].Value;
 				headers["Cookie"] = string.Join("; ", header.Select(t => t.Key + "=" + t.Value));
-				data["header"] = JsonConvert.SerializeObject(header);
+				data["header"] = JsonSerializer.Serialize(header);
 				data2 = Crypto.EApi(options.Url, data);
 				url = Regex.Replace(url, @"\w*api", "eapi");
 				break;
@@ -127,15 +127,15 @@ namespace NeteaseCloudMusicApi.Utils {
 					setCookie.Add(QuickHttp.ParseCookies(rawSetCookie));
 				bool isEApi = options.Crypto == "eapi";
 				byte[] buffer = await response.Content.ReadAsByteArrayAsync();
-				JObject json;
+				JsonNode json;
 				try {
 					if (isEApi && buffer[0] != 0x7B && buffer[1] != 0x22)
 						buffer = Crypto.Decrypt(buffer);
 					// response body前两个字符应该为{"，否则认为是加密的
-					json = JObject.Parse(Encoding.UTF8.GetString(buffer));
+					json = JsonNode.Parse(Encoding.UTF8.GetString(buffer));
 				}
 				catch when (isEApi) {
-					json = JObject.Parse(Encoding.UTF8.GetString(Crypto.Decrypt(buffer)));
+					json = JsonNode.Parse(Encoding.UTF8.GetString(Crypto.Decrypt(buffer)));
 				}
 				if (json["code"] is null) {
 					System.Diagnostics.Debug.Assert(true, "code不应为null");
@@ -144,7 +144,7 @@ namespace NeteaseCloudMusicApi.Utils {
 				return json;
 			}
 			catch (Exception ex) {
-				return new JObject {
+				return new JsonObject {
 					["code"] = 502,
 					["msg"] = ex.ToFullString()
 				};

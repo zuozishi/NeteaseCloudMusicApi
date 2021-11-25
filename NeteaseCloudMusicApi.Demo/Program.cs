@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace NeteaseCloudMusicApi.Demo {
 	internal static class Program {
@@ -45,11 +45,11 @@ namespace NeteaseCloudMusicApi.Demo {
 
 				json = await api.RequestAsync(CloudMusicApiProviders.UserPlaylist, new Dictionary<string, object> { ["uid"] = uid });
 				json = await api.RequestAsync(CloudMusicApiProviders.PlaylistDetail, new Dictionary<string, object> { ["id"] = json["playlist"][0]["id"] });
-				int[] trackIds = json["playlist"]["trackIds"].Select(t => (int)t["id"]).ToArray();
+				int[] trackIds = ((JsonArray)json["playlist"]["trackIds"]).Select(t => (int)t["id"]).ToArray();
 				json = await api.RequestAsync(CloudMusicApiProviders.SongDetail, new Dictionary<string, object> { ["ids"] = trackIds });
 				Console.WriteLine($"我喜欢的音乐（{trackIds.Length} 首）：");
-				foreach (var song in json["songs"])
-					Console.WriteLine($"{string.Join(",", song["ar"].Select(t => t["name"]))} - {song["name"]}");
+				foreach (var song in (JsonArray)json["songs"])
+					Console.WriteLine($"{string.Join(",", ((JsonArray)song["ar"]).Select(t => t["name"]))} - {song["name"]}");
 				Console.WriteLine();
 
 				/******************** 获取我喜欢的音乐 ********************/
@@ -60,7 +60,7 @@ namespace NeteaseCloudMusicApi.Demo {
 
 				json = await api.RequestAsync(CloudMusicApiProviders.UserFollows, new Dictionary<string, object> { ["uid"] = uid });
 				Console.WriteLine($"我的关注：");
-				foreach (var user in json["follow"])
+				foreach (var user in (JsonArray)json["follow"])
 					Console.WriteLine(user["nickname"]);
 				Console.WriteLine();
 
@@ -68,8 +68,8 @@ namespace NeteaseCloudMusicApi.Demo {
 
 				json = await api.RequestAsync(CloudMusicApiProviders.UserEvent, new Dictionary<string, object> { ["uid"] = uid });
 				Console.WriteLine($"我的动态：");
-				foreach (var @event in json["events"])
-					Console.WriteLine(JObject.Parse((string)@event["json"])["msg"]);
+				foreach (var @event in (JsonArray)json["events"])
+					Console.WriteLine(JsonNode.Parse((string)@event["json"])["msg"]);
 				Console.WriteLine();
 
 				/******************** 获取我的动态 ********************/

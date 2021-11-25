@@ -5,7 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace NeteaseCloudMusicApi.Utils {
 	internal static class Crypto {
@@ -17,7 +17,7 @@ namespace NeteaseCloudMusicApi.Utils {
 		private static readonly byte[] eapiKey = Encoding.ASCII.GetBytes("e82ckenh8dichen8");
 
 		public static Dictionary<string, string> WEApi(object @object) {
-			string text = JsonConvert.SerializeObject(@object);
+			string text = JsonSerializer.Serialize(@object);
 			byte[] secretKey = new Random().RandomBytes(16);
 			secretKey = secretKey.Select(n => (byte)base62[n % 62]).ToArray();
 			return new Dictionary<string, string> {
@@ -27,14 +27,14 @@ namespace NeteaseCloudMusicApi.Utils {
 		}
 
 		public static Dictionary<string, string> LinuxApi(object @object) {
-			string text = JsonConvert.SerializeObject(@object);
+			string text = JsonSerializer.Serialize(@object);
 			return new Dictionary<string, string> {
 				["eparams"] = AesEncrypt(text.ToByteArrayUtf8(), CipherMode.ECB, linuxapiKey, null).ToHexStringUpper()
 			};
 		}
 
 		public static Dictionary<string, string> EApi(string url, object @object) {
-			string text = JsonConvert.SerializeObject(@object);
+			string text = JsonSerializer.Serialize(@object);
 			string message = $"nobody{url}use{text}md5forencrypt";
 			string digest = message.ToByteArrayUtf8().ComputeMd5().ToHexStringLower();
 			string data = $"{url}-36cd479b6b5-{text}-36cd479b6b5-{digest}";

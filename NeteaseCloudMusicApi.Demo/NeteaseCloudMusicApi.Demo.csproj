@@ -2,12 +2,9 @@
 	<PropertyGroup>
 		<OutputPath>..\bin\$(Configuration)</OutputPath>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
+		<TargetFrameworks>net6</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.*" />
-	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\NeteaseCloudMusicApi\NeteaseCloudMusicApi.csproj" />
 	</ItemGroup>

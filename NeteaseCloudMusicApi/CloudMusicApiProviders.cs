@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using NeteaseCloudMusicApi.Utils;
-using Newtonsoft.Json;
 using static NeteaseCloudMusicApi.CloudMusicApiProvider;
 
 namespace NeteaseCloudMusicApi {
@@ -614,7 +614,7 @@ namespace NeteaseCloudMusicApi {
 		/// 全部 mv
 		/// </summary>
 		public static readonly CloudMusicApiProvider MvAll = new CloudMusicApiProvider("/mv/all", HttpMethod.Post, "https://interface.music.163.com/api/mv/all", new ParameterInfo[] {
-			new ParameterInfo("tags", ParameterType.Custom) { CustomHandler = q => JsonConvert.SerializeObject(new Dictionary<string, object> {
+			new ParameterInfo("tags", ParameterType.Custom) { CustomHandler = q => JsonSerializer.Serialize(new Dictionary<string, object> {
 				["地区"] = q.GetValueOrDefault("area", "全部"),
 				["类型"] = q.GetValueOrDefault("type", "全部"),
 				["排序"] = q.GetValueOrDefault("order", "上升最快")
@@ -877,9 +877,9 @@ namespace NeteaseCloudMusicApi {
 		/// 听歌打卡
 		/// </summary>
 		public static readonly CloudMusicApiProvider Scrobble = new CloudMusicApiProvider("/scrobble", HttpMethod.Post, "https://music.163.com/weapi/feedback/weblog", new ParameterInfo[] {
-			new ParameterInfo("logs", ParameterType.Custom) { CustomHandler = q => JsonConvert.SerializeObject(new Dictionary<string, object> {
+			new ParameterInfo("logs", ParameterType.Custom) { CustomHandler = q => JsonSerializer.Serialize(new Dictionary<string, object> {
 				["action"] = "play",
-				["json"] = JsonConvert.SerializeObject(new Dictionary<string, object> {
+				["json"] = JsonSerializer.Serialize(new Dictionary<string, object> {
 					["id"] = q["id"],
 					["sourceId"] = q["sourceId"],
 					["time"] = q["time"],
